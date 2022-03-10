@@ -36,46 +36,109 @@ graphs <- c("All Years", "Each Day", "Each Month", "Each Day of Week", "Table")
 years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
 
 # Create the shiny dashboard
+#ui <- shinyUI(
+#  navbarPage("CTA Riders", position = "fixed-bottom",
+#             tabPanel("Plot",
+#                      mainPanel(
+#                        column(2, style = "background-color: #00FF00;",
+#                        ),
+#                        column(8,
+#                               fluidRow(
+#                                 box
+#                                 (
+#                                   title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+#                                   plotOutput("hist2", width = "70%", height = 2000)
+#                                 )
+#                               )
+#                        )
+#                      )
+#             ),
+#             tabPanel("About",
+#                      fluidPage(
+#                        fluidRow(style="font-size: 40px; padding-bottom: 15%",
+#                                 h1("CTA Rides Data"),
+#                                 h4("Author: Wayne Kao"),
+#                                 h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
+#                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
+#                                from three stations: UIC-Halsted, O'Hare Airport, and 54th/Cermak. For UIC-Halsted, the coloring of the graph coresponds
+#                                more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
+#                                based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
+#                                to switch graphs between looking at all the riders at a particular station with the following criteria:
+#                                all years from 2001-2021, or all riders categorized by days, months, day of the week with a particular year.
+#                                You are also given an option to view all graphs in a table like structure.")
+#                        )
+#                      )
+#             ),
+#             tags$style(type="text/css",
+#                        '.navbar{
+#                font-size: 20px;
+#             }')
+#  )
+#)
 ui <- shinyUI(
   navbarPage("CTA Riders", position = "fixed-bottom",
-             tabPanel("Plot",
-                      mainPanel(
-                        column(8,
-                               fluidRow(
-                                 box
-                                 (
-                                   title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                                   plotOutput("hist2", height = 500, width = 500)
-                                 )
-                               )
-                        )
-                      )
-             ),
-             tabPanel("About",
-                      fluidPage(
-                        fluidRow(style="font-size: 40px; padding-bottom: 15%",
-                                 h1("CTA Rides Data"),
-                                 h4("Author: Wayne Kao"),
-                                 h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
-                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
-                                from three stations: UIC-Halsted, O'Hare Airport, and 54th/Cermak. For UIC-Halsted, the coloring of the graph coresponds
-                                more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
-                                based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
-                                to switch graphs between looking at all the riders at a particular station with the following criteria:
-                                all years from 2001-2021, or all riders categorized by days, months, day of the week with a particular year.
-                                You are also given an option to view all graphs in a table like structure.")
-                        )
-                      )
-             ),
-             tags$style(type="text/css",
-                        '.navbar{
-                font-size: 20px;
-             }')
+    tabPanel("Plot",
+      fluidPage(style="background-color: lightblue",
+        column(2, style = "height:3200px;background-color: orange"),
+        column(10,style = "height:200px;",
+          fluidRow(class = "myRow1",
+            column(4,style = "height:200px;background-color: yellow",
+                   box(
+                     title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                     plotOutput("hist2", width = "100%", height = 2500)
+                   )
+            ),
+            column(4,style = "height:200px;background-color: blue"),
+            column(4,style = "height:200px;background-color: green",
+              box(
+               title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+               plotOutput("hist1", width = "100%", height = 2500)
+              )
+            ),
+          )
+        ),
+
+        # fluidRow(class = "myRow2",
+        #         column(6,div(style = "height:100px;background-color: green;", "Bottomleft")),
+        #         column(6,div(style = "height:150px;background-color: red;", "Bottomright"))),
+        tags$head(tags$style(
+          ".myRow1{height:3000px;}")
+        )
+
+      )
+    ),
+    tabPanel("About",
+      fluidPage(
+        fluidRow(style="font-size: 40px; padding-bottom: 15%",
+          h1("CTA Rides Data"),
+          h4("Author: Wayne Kao"),
+          h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
+          div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
+          from three stations: UIC-Halsted, O'Hare Airport, and 54th/Cermak. For UIC-Halsted, the coloring of the graph coresponds
+          more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
+          based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
+          to switch graphs between looking at all the riders at a particular station with the following criteria:
+          all years from 2001-2021, or all riders categorized by days, months, day of the week with a particular year.
+          You are also given an option to view all graphs in a table like structure.")
+        )
+      )
+    ),
+    tags$style(type="text/css",
+    '.navbar{
+    font-size: 20px;
+    }')
   )
 )
 
 server <- function(input, output) {
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
+
+  output$hist1 <- renderPlot({
+    justOneStop_2 <- justOneStopReactive_2()
+
+    ggplot(data=justOneStop_2, aes(wday(ymd(justOneStop_2$date)),  justOneStop_2$rides, fill=factor(month(ymd(justOneStop_2$date))))) +
+      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month")
+  })
 
   output$hist2 <- renderPlot({
     justOneStop_2 <- justOneStopReactive_2()
