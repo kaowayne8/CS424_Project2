@@ -49,20 +49,20 @@ ui <- shinyUI(
                           column(1)
                         ),
 
-                        fluidRow( style="padding-top: 2%; padding-bottom: 18%",
+                        #fluidRow( style="padding-top: 2%; padding-bottom: 18%",
                           #UIC Halsted (left) control panel
-                          column(6, align="center",
-                                selectInput("select_left", "Select Station", stations, selected="UIC-Halsted"),
-                                selectInput("select_left_graph", "Select Graph", graphs, selected="All Years"),
-                                selectInput("select_left_year", "Select Year", years, selected="2021")
+                         # column(6, align="center",
+                          #      selectInput("select_left", "Select Station", stations, selected="UIC-Halsted"),
+                           #     selectInput("select_left_graph", "Select Graph", graphs, selected="All Years"),
+                            #    selectInput("select_left_year", "Select Year", years, selected="2021")
 
-                          ),
+                          #),
                           #O'Hare (right) control panel
-                          column(6, align="center",
-                                 selectInput("select_right", "Select Station", stations, selected="O'Hare Airport"),
-                                 selectInput("select_right_graph", "Select Graph", graphs, selected="All Years"),
-                                 selectInput("select_right_year", "Select Year", years, selected="2021")
-                          )
+                          #column(6, align="center",
+                           #      selectInput("select_right", "Select Station", stations, selected="O'Hare Airport"),
+                            #     selectInput("select_right_graph", "Select Graph", graphs, selected="All Years"),
+                             #    selectInput("select_right_year", "Select Year", years, selected="2021")
+                          #)
                         )
                       )
               ),
