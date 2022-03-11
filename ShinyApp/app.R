@@ -31,9 +31,9 @@ dataStations <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
 colnames(dataStations) <- c("", "station_id", "stationname", "date", "daytype", "rides", "STOP_ID", "Location")
 dataStations$date <- mdy(dataStations$date)
 
-stations <- c("UIC-Halsted", "O'Hare Airport", "54th/Cermak")
-graphs <- c("All Years", "Each Day", "Each Month", "Each Day of Week", "Table")
-years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
+#stations <- c("UIC-Halsted", "O'Hare Airport", "54th/Cermak")
+#graphs <- c("All Years", "Each Day", "Each Month", "Each Day of Week", "Table")
+#years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
 
 # Create the shiny dashboard
 #ui <- shinyUI(
@@ -79,21 +79,25 @@ ui <- shinyUI(
   navbarPage("CTA Riders", position = "fixed-bottom",
     tabPanel("Plot",
       fluidPage(style="background-color: lightblue",
-        column(2, style = "height:1620px;background-color: orange"),
-        column(10,style = "height:200px;",
+        column(1, style = "height:1620px;background-color: orange",
+          column(12,
+            dateInput("date1", "Date:", value = "2021-08-23"),
+          )
+        ),
+        column(11,style = "height:200px;",
           fluidRow(class = "myRow1",
             column(4,style = "height:200px;background-color: yellow",
                    box(
                      title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                     plotOutput("hist2", width = "100%", height = 1400)
+                     plotOutput("stopsByDate", width = "100%", height = 1400)
                    )
             ),
             column(4,style = "height:200px;background-color: blue"),
-            column(4,style = "height:200px;background-color: green",
-              box(
-               title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-               plotOutput("hist1", width = "100%", height = 1400)
-              )
+            column(4,style = "height:200px;background-color: green"
+              # box(
+              #  title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+              #  plotOutput("hist1", width = "100%", height = 1400)
+              # )
             ),
           )
         ),
@@ -138,11 +142,13 @@ ui <- shinyUI(
 
 server <- function(input, output) {
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
+  allStopsByDate <- reactive({subset(dataStations, ymd(dataStations$date) == ymd(input$date))})
 
-  output$hist1 <- renderPlot({
-    justOneStop_2 <- justOneStopReactive_2()
+  #Plot of some date
+  output$stopsByDate <- renderPlot({
+    d_graph <- allStopsByDate()
 
-    ggplot(data=justOneStop_2, aes(wday(ymd(justOneStop_2$date)),  justOneStop_2$rides, fill=factor(month(ymd(justOneStop_2$date))))) +
+    ggplot(data=d_graph, aes(d_graph$stationname),  d_graph$rides) +
       geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month")
   })
 
