@@ -102,7 +102,13 @@ ui <- shinyUI(
         #         column(6,div(style = "height:100px;background-color: green;", "Bottomleft")),
         #         column(6,div(style = "height:150px;background-color: red;", "Bottomright"))),
         tags$head(tags$style(
-          ".myRow1{height:1620px;}")
+          " .myRow1{
+              height:1620px;
+            }
+            .container-fluid{
+              background-color: lightblue;
+            }
+          ")
         )
 
       )
