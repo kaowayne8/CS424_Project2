@@ -142,14 +142,16 @@ ui <- shinyUI(
 
 server <- function(input, output) {
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
-  allStopsByDate <- reactive({subset(dataStations, ymd(dataStations$date) == ymd(input$date))})
+  allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))})
 
   #Plot of some date
   output$stopsByDate <- renderPlot({
     d_graph <- allStopsByDate()
+    print(input$date1)
 
-    ggplot(data=d_graph, aes(d_graph$stationname),  d_graph$rides) +
-      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month")
+    ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(d_graph$rides))) +
+      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+      theme(axis.text.x = element_text(angle = 90, size = 14), axis.text.y = element_text(size = 15))
   })
 
   output$hist2 <- renderPlot({
