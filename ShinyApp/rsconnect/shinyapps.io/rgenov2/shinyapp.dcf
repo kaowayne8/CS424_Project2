@@ -1,0 +1,13 @@
+name: shinyapp
+title:
+username:
+account: rgenov2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5827623
+bundleId: 5668483
+url: https://rgenov2.shinyapps.io/shinyapp/
+when: 1646948931.63821
+lastSyncTime: 1646948931.63821
+asMultiple: FALSE
+asStatic: FALSE

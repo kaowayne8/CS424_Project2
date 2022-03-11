@@ -79,20 +79,20 @@ ui <- shinyUI(
   navbarPage("CTA Riders", position = "fixed-bottom",
     tabPanel("Plot",
       fluidPage(style="background-color: lightblue",
-        column(2, style = "height:3200px;background-color: orange"),
+        column(2, style = "height:1620px;background-color: orange"),
         column(10,style = "height:200px;",
           fluidRow(class = "myRow1",
             column(4,style = "height:200px;background-color: yellow",
                    box(
                      title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                     plotOutput("hist2", width = "100%", height = 2500)
+                     plotOutput("hist2", width = "100%", height = 1400)
                    )
             ),
             column(4,style = "height:200px;background-color: blue"),
             column(4,style = "height:200px;background-color: green",
               box(
                title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-               plotOutput("hist1", width = "100%", height = 2500)
+               plotOutput("hist1", width = "100%", height = 1400)
               )
             ),
           )
