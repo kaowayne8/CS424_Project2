@@ -149,9 +149,9 @@ server <- function(input, output) {
     d_graph <- allStopsByDate()
     print(input$date1)
 
-    ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(d_graph$rides))) +
+    ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(gsub(",", "", d_graph$rides)))) +
       geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
-      theme(axis.text.x = element_text(angle = 90, size = 14), axis.text.y = element_text(size = 15))
+      theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
   })
 
   output$hist2 <- renderPlot({
