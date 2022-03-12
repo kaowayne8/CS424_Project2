@@ -194,35 +194,35 @@ ui <- shinyUI(
                       fluidPage(style="background-color: lightblue",
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
-                                              dateInput("t_date1", "Date:", value = "2021-08-23"),
-                                              dateInput("t_date2", "Date:", value = "2021-07-22"),
+                                              dateInput("t_date1", "Date 1:", value = "2021-08-23"),
+                                              dateInput("t_date2", "Date 2:", value = "2021-07-22"),
                                               radioButtons("t_order", "Order By:",
                                                            c("Alphabetical" = "alpha",
                                                              "Minimum to Maximum" = "minmax")
                                               )
                                        )
                                 ),
-                                column(8,style = "height:200px;",
+                                column(8,
                                        fluidRow(class = "s3r1",
-                                                column(6,style = "height:200px;background-color: yellow",
-                                                       # box(
-                                                       #   title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                                                       #   plotOutput("stopsByDate", width = "100%", height = 1400)
-                                                       # )
+                                                column(6,
+                                                       box(
+                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         plotOutput("stopsDate1", width = "100%", height = 700)
+                                                       )
                                                 ),
-                                                column(6,style = "height:200px;background-color: blue",
-                                                       # dataTableOutput("table_all_station")
+                                                column(6,
+                                                       dataTableOutput("table_all_station_d1")
                                                 )
                                        ),
                                        fluidRow(class = "s3r2",
-                                                column(6,style = "height:200px;background-color: blue",
-                                                       # box(
-                                                       #   title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                                                       #   plotOutput("stopsByDate", width = "100%", height = 1400)
-                                                       # )
+                                                column(6,
+                                                       box(
+                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         plotOutput("stopsDate2", width = "100%", height = 700)
+                                                       )
                                                 ),
-                                                column(6,style = "height:200px;background-color: yellow",
-                                                       # dataTableOutput("table_all_station")
+                                                column(6,
+                                                       dataTableOutput("table_all_station_d2")
                                                 ),
                                        )
                                 ),
@@ -281,15 +281,38 @@ server <- function(input, output, session) {
                   1))
   }
 
+  orderOpt2 <- function(){
+    return(switch(input$t_order,
+                  alpha = 1,
+                  minmax = 2,
+                  1))
+  }
+
   #-----------Functions for Aggregate Data-------------
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
   allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
+  allStopsDate1 <- reactive({subset(dataStations, dataStations$date == ymd(input$t_date1))}) #Aggregates all stations by specific date
+  allStopsDate2 <- reactive({subset(dataStations, dataStations$date == ymd(input$t_date2))}) #Aggregates all stations by specific date
   specificStation <- reactive({subset(dataStations, year(ymd(dataStations$date)) == input$select_year & dataStations$stationname == input$select_station)})
   allyearsStation <- reactive({subset(dataStations, dataStations$stationname == input$select_station)})
 
   #Returns rides for all stations for current date chosen
   allStopsNoDup <- function(){
     merge <- allStopsByDate()
+    merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
+    return(merge)
+  }
+
+  #Returns rides for all stations for current date chosen
+  allStops1 <- function(){
+    merge <- allStopsDate1()
+    merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
+    return(merge)
+  }
+
+  #Returns rides for all stations for current date chosen
+  allStops2 <- function(){
+    merge <- allStopsDate2()
     merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
     return(merge)
   }
@@ -307,6 +330,20 @@ server <- function(input, output, session) {
 
     return(frame)
   }
+
+  simpleData2 <- function(data){
+    orderOption <- orderOpt2()
+    frame <- data.frame(data$stationname, data$date, data$rides)
+    if(orderOption == 1){
+      frame <- frame[order(data$stationname),]
+    }
+    else{
+      frame <- frame[order(data$rides),]
+    }
+
+    return(frame)
+  }
+
 
   simpleSpecificStation <- function(data){
     frame <- data.frame(data$stationname, data$date, data$rides)
@@ -334,9 +371,26 @@ server <- function(input, output, session) {
 
   graph_stopsDate1 <- function(){
 
-    d_graph <- allStopsNoDup()
+    d_graph <- allStops1()
     g <- NULL
-    i_order = orderOpt()
+    i_order = orderOpt2()
+
+    if(i_order == 2)
+      g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),d_graph$rides) , y=d_graph$rides))
+    else
+      g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
+
+    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+      theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
+
+    return(g)
+  }
+
+  graph_stopsDate2 <- function(){
+
+    d_graph <- allStops2()
+    g <- NULL
+    i_order = orderOpt2()
 
     if(i_order == 2)
       g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),d_graph$rides) , y=d_graph$rides))
@@ -423,6 +477,16 @@ server <- function(input, output, session) {
                                                 pageLength = 35
                                               )
   )
+  output$table_all_station_d1 <- renderDataTable(simpleData2(allStops1()),
+                                              options = list(
+                                                pageLength = 17
+                                              )
+  )
+  output$table_all_station_d2 <- renderDataTable(simpleData2(allStops2()),
+                                              options = list(
+                                                pageLength = 17
+                                              )
+  )
 
   output$hist2 <- reactive({renderPlot({
     justOneStop_2 <- justOneStopReactive_2()
@@ -467,7 +531,10 @@ server <- function(input, output, session) {
   )
 
   #Scene 3
-  output$stopsDate1 <- renderPlot({graph_stopsByDate()})
+  output$stopsDate1 <- renderPlot({graph_stopsDate1()})
+
+  output$stopsDate2 <- renderPlot({graph_stopsDate2()})
+
 
 }
 
