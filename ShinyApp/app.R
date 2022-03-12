@@ -111,6 +111,7 @@ ui <- shinyUI(
                                                  plotOutput("stopsByDate", width = "100%", height = 700)
                                                )
                                         ),
+                                       br(),
                                         fluidRow(
                                                dataTableOutput("table_all_station")
                                         )
@@ -118,7 +119,7 @@ ui <- shinyUI(
 
                                 ),
                                 column(3,
-                                       leafletOutput("mymap"),
+                                       leafletOutput("mymap", height=1520, width="100%"),
                                        p(),
                                        actionButton("recalc", "New points")
                                 ),
@@ -165,6 +166,7 @@ ui <- shinyUI(
                                                        )
                                                 )
                                        ),
+                                       br(),
                                        fluidRow(class = "s2r2",
                                                 column(9,
                                                        box(
@@ -172,6 +174,7 @@ ui <- shinyUI(
                                                          plotOutput("all_station_years", width = "100%", height = 700)
                                                        )
                                                 ),#table_specific_station
+                                                
                                                 column(3,
                                                        dataTableOutput("table_specific_station")
                                                 )
@@ -214,10 +217,12 @@ ui <- shinyUI(
                                                          plotOutput("stopsDate1", width = "100%", height = 700)
                                                        )
                                                 ),
+                                                br(),
                                                 column(3,
                                                        dataTableOutput("table_all_station_d1")
                                                 )
                                        ),
+                                       br(),
                                        fluidRow(class = "s3r2",
                                                 column(9,
                                                        box(
@@ -225,6 +230,7 @@ ui <- shinyUI(
                                                          plotOutput("stopsDate2", width = "100%", height = 700)
                                                        )
                                                 ),
+                                                br(),
                                                 column(3,
                                                        dataTableOutput("table_all_station_d2")
                                                 ),
