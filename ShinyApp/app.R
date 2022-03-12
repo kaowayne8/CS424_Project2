@@ -211,13 +211,11 @@ ui <- shinyUI(
                                  h1("CTA Rides Data"),
                                  h4("Author: Wayne Kao and Raphael Genova"),
                                  h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
-                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
-          from all CTA stations. Each page has its own unique functionality to fit the proper visualizations. For UIC-Halsted, the coloring of the graph coresponds
-          more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
-          based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
-          to switch graphs between looking at all the riders at a particular station with the following criteria:
-          all years from 2001-2021, or all riders categorized by days, months, day of the week with a particular year.
-          You are also given an option to view all graphs in a table like structure.")
+                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from Jan 1, 2001- November 21, 2021
+          from all CTA stations. Each page has its own unique functionality to fit the proper visualizations and format. By default, the site goes to the 'By Date' tab. The 'By Date' tab contains a bar graph that has all of the ridership
+          of each stop at a particular date and there is also a table that gives more detail about what is displayed on the bar graph. This tab also contains a leaflet which shows geographically where each CTA stop is (which is indicated 
+          by a blue point). The 'By Station' tab allows the use to compare between two stations at specific years. The bar graphs give ridership numbers per Day, Month, and Weekday. The 'Compare' tab contains two bar graphs and tables each 
+          graph/table set represents a particular date the user would like to explore. The graphs and tables display the total ridership of each stop at that particular day.")
                         )
                       )
              ),
