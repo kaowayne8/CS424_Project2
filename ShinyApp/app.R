@@ -4,7 +4,8 @@
 # Author: Wayne Kao
 
 #TODO:
-# Test on Shiny app
+# Make it look better
+# Fix min max on date
 
 
 #libraries to include
@@ -82,6 +83,10 @@ ui <- shinyUI(
         column(1, style = "height:1620px;background-color: orange",
           column(12,
             dateInput("date1", "Date:", value = "2021-08-23"),
+            fluidRow(class = "dayRow",
+              actionButton("previousday", "Previous Day"),
+              actionButton("nextday", "Next Day"),
+            )
           )
         ),
         column(11,style = "height:200px;",
@@ -140,9 +145,10 @@ ui <- shinyUI(
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
   allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))})
+
 
   #Plot of some date
   output$stopsByDate <- renderPlot({
@@ -152,6 +158,24 @@ server <- function(input, output) {
     ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(gsub(",", "", d_graph$rides)))) +
       geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
+  })
+
+  # Next day button
+  observeEvent(input$nextday, {
+    updateDateInput(session, "date1",
+      value = ymd(input$date1)+1
+      # min   = paste("2013-04-", x-1, sep=""),
+      # max   = paste("2013-04-", x+1, sep="")
+    )
+  })
+
+  # Previous day button
+  observeEvent(input$previousday, {
+    updateDateInput(session, "date1",
+      value = ymd(input$date1)-1
+      # min   = paste("2013-04-", x-1, sep=""),
+      # max   = paste("2013-04-", x+1, sep="")
+    )
   })
 
   output$hist2 <- renderPlot({
