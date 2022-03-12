@@ -26,13 +26,35 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 
-
 myfiles <- list.files(pattern="*.csv", full.names=TRUE)
 dataStations <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
 colnames(dataStations) <- c("", "station_id", "stationname", "date", "daytype", "rides", "STOP_ID", "Location")
 dataStations$date <- mdy(dataStations$date)
 dataStations$rides <- as.numeric(gsub(",", "", dataStations$rides))
 
+#leaflet data
+coordinates <- dataStations[!duplicated(dataStations$stationname), ]
+lat = c()
+long = c()
+for(row in 1:length(coordinates[,1])){
+  curr_coord = coordinates[row,]$Location
+  size <- nchar(as.character(curr_coord))
+  coord <- substr(curr_coord, 2, size)
+  size <- nchar(as.character(coord))
+  coord <- substr(coord, 1, size-1)
+  coord_arr <- strsplit(coord, split=",")
+  coord_frame<-matrix(unlist(coord_arr[1]), ncol=1)
+  lat <- append(lat, coord_frame[1,])
+  long <- append(long,coord_frame[2,])
+
+}
+
+coordinates$latitude <- lat
+coordinates$longitude <- long
+
+leafData <- data.frame(coordinates$stationname, coordinates$latitude, coordinates$longitude)
+colnames(leafData) <- c("stationname", "lat", "long")
+print(leafData)
 
 years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
 
@@ -72,9 +94,9 @@ ui <- shinyUI(
 
                                 ),
                                 column(3,
-                                       leafletOutput("mymap", height=1520, width="100%"),
-                                       p(),
-                                       actionButton("recalc", "New points")
+                                       leafletOutput("mymap", height=1520, width="100%")
+                                       # p(),
+                                       # actionButton("recalc", "New points")
                                 ),
 
                                 tags$head(tags$style(
@@ -213,8 +235,8 @@ ui <- shinyUI(
                                  h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
                                  div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from Jan 1, 2001- November 21, 2021
           from all CTA stations. Each page has its own unique functionality to fit the proper visualizations and format. By default, the site goes to the 'By Date' tab. The 'By Date' tab contains a bar graph that has all of the ridership
-          of each stop at a particular date and there is also a table that gives more detail about what is displayed on the bar graph. This tab also contains a leaflet which shows geographically where each CTA stop is (which is indicated 
-          by a blue point). The 'By Station' tab allows the use to compare between two stations at specific years. The bar graphs give ridership numbers per Day, Month, and Weekday. The 'Compare' tab contains two bar graphs and tables each 
+          of each stop at a particular date and there is also a table that gives more detail about what is displayed on the bar graph. This tab also contains a leaflet which shows geographically where each CTA stop is (which is indicated
+          by a blue point). The 'By Station' tab allows the use to compare between two stations at specific years. The bar graphs give ridership numbers per Day, Month, and Weekday. The 'Compare' tab contains two bar graphs and tables each
           graph/table set represents a particular date the user would like to explore. The graphs and tables display the total ridership of each stop at that particular day.")
                         )
                       )
@@ -462,10 +484,9 @@ server <- function(input, output, session) {
 
   output$mymap <- renderLeaflet({
     leaflet() %>%
-      addProviderTiles(providers$Stamen.TonerLite,
-                       options = providerTileOptions(noWrap = TRUE)
-      ) %>%
-      addMarkers(data = points())
+      addTiles() %>%
+      setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
+      addCircleMarkers(lng=as.numeric(leafData$long), lat=as.numeric(leafData$lat), popup=leafData$stationname)
   })
 
 
