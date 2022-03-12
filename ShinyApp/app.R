@@ -4,7 +4,12 @@
 # Author: Wayne Kao
 
 #TODO:
-# Test on Shiny app
+# Make it look better
+#Background color
+#Menu column spacing
+# Fix min max on date
+# Fix labels on graph
+# Fix coloring on graph
 
 
 #libraries to include
@@ -82,6 +87,15 @@ ui <- shinyUI(
         column(1, style = "height:1620px;background-color: orange",
           column(12,
             dateInput("date1", "Date:", value = "2021-08-23"),
+            
+            fluidRow(class = "dayRow",
+                     actionButton("previousday", "Previous Day"),
+                     actionButton("nextday", "Next Day"),
+            ),
+            radioButtons("order", "Order By:",
+                         c("Alphabetical" = "alpha",
+                           "Minimum to Maximum" = "minmax")
+            )
           )
         ),
         column(11,style = "height:200px;",
@@ -92,12 +106,14 @@ ui <- shinyUI(
                      plotOutput("stopsByDate", width = "100%", height = 1400)
                    )
             ),
-            column(4,style = "height:200px;background-color: blue"),
-            column(4,style = "height:200px;background-color: green"
-              # box(
-              #  title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-              #  plotOutput("hist1", width = "100%", height = 1400)
-              # )
+            column(4,style = "height:200px;background-color: blue",
+                   dataTableOutput("table_all_station")
+                   ),
+            column(4,style = "height:200px;background-color: green",
+                   leafletOutput("mymap"),
+                   p(),
+                   actionButton("recalc", "New points")
+              
             ),
           )
         ),
@@ -140,25 +156,93 @@ ui <- shinyUI(
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
+  #-----------Utility-------------
+  #This returns the ordering option for radio button
+  #1 = order alphabetically
+  #2 = order by minimum and maximum
+  orderOpt <- function(){
+    return(switch(input$order,
+                  alpha = 1,
+                  minmax = 2,
+                  1))
+  }
+  #-----------Functions for Aggregate Data-------------
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
-  allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))})
-
+  allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
+  #Returns rides for all stations for current date chosen
+  allStopsNoDup <- function(){
+    merge <- allStopsByDate()
+    merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
+    merge$rides <- as.numeric(gsub(",", "", merge$rides))
+    return(merge)
+  }
+  #Returns table with only needed columns
+  simpleData <- function(data){
+    orderOption <- orderOpt()
+    frame <- data.frame(data$stationname, data$date, data$rides)
+    if(orderOption == 1){
+      frame <- frame[order(data$stationname),]
+    }
+    else{
+      frame <- frame[order(data$rides),]
+    }
+    return(frame)
+  }
+  #-----------Functions for graphs-------------
+  #This returns a graph of all stops for a specific date
+  graph_stopsByDate <- function(){
+    d_graph <- allStopsNoDup()
+    g <- NULL
+    i_order = orderOpt()
+    if(i_order == 2)
+      g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),d_graph$rides) , y=d_graph$rides))
+    else
+      g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
+    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+      theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
+    return(g)
+  }
+  #-----------OnActionEvents----------------
   #Plot of some date
-  output$stopsByDate <- renderPlot({
-    d_graph <- allStopsByDate()
-    print(input$date1)
-
-    ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(d_graph$rides))) +
-      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
-      theme(axis.text.x = element_text(angle = 90, size = 14), axis.text.y = element_text(size = 15))
+  output$stopsByDate <- renderPlot({graph_stopsByDate()})
+  # Next day button
+  observeEvent(input$nextday, {
+    updateDateInput(session, "date1",
+                    value = ymd(input$date1)+1
+                    # min   = paste("2013-04-", x-1, sep=""),
+                    # max   = paste("2013-04-", x+1, sep="")
+    )
   })
-
+  # Previous day button
+  observeEvent(input$previousday, {
+    updateDateInput(session, "date1",
+                    value = ymd(input$date1)-1
+                    # min   = paste("2013-04-", x-1, sep=""),
+                    # max   = paste("2013-04-", x+1, sep="")
+    )
+  })
+  output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
+                                              options = list(
+                                                pageLength = 35
+                                              )
+  )
   output$hist2 <- renderPlot({
     justOneStop_2 <- justOneStopReactive_2()
-
     ggplot(data=justOneStop_2, aes(wday(ymd(justOneStop_2$date)),  justOneStop_2$rides, fill=factor(month(ymd(justOneStop_2$date))))) +
       geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month")
+  })
+  
+  points <- eventReactive(input$recalc, {	
+    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)	
+  }, ignoreNULL = FALSE)	
+  
+  output$mymap <- renderLeaflet({	
+    leaflet() %>%	
+      addProviderTiles(providers$Stamen.TonerLite,	
+                       options = providerTileOptions(noWrap = TRUE)	
+      ) %>%	
+      addMarkers(data = points())	
   })
 }
 
