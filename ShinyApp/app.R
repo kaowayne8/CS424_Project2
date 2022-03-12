@@ -85,7 +85,7 @@ years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014
 #)
 ui <- shinyUI(
   navbarPage("CTA Riders", position = "fixed-bottom",
-             tabPanel("Plot",
+             tabPanel("By Date",
                       fluidPage(style="background-color: lightblue",
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
@@ -102,28 +102,25 @@ ui <- shinyUI(
                                               )
                                        )
                                 ),
-                                column(11,style = "height:200px;",
-                                       fluidRow(class = "myRow1",
-                                                column(4,style = "height:200px;background-color: yellow",
-                                                       box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                                                         plotOutput("stopsByDate", width = "100%", height = 1400)
-                                                       )
-                                                ),
-                                                column(4,style = "height:200px;background-color: blue",
-                                                       dataTableOutput("table_all_station")
-                                                ),
-                                                column(4,style = "height:200px;background-color: green",
-                                                       leafletOutput("mymap"),
-                                                       p(),
-                                                       actionButton("recalc", "New points")
-                                                ),
-                                       )
+                                column(8,
+                                        fluidRow(
+                                               box(
+                                                 title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                 plotOutput("stopsByDate", width = "100%", height = 700)
+                                               )
+                                        ),
+                                        fluidRow(
+                                               dataTableOutput("table_all_station")
+                                        )
+
+
+                                ),
+                                column(3,
+                                       leafletOutput("mymap"),
+                                       p(),
+                                       actionButton("recalc", "New points")
                                 ),
 
-                                # fluidRow(class = "myRow2",
-                                #         column(6,div(style = "height:100px;background-color: green;", "Bottomleft")),
-                                #         column(6,div(style = "height:150px;background-color: red;", "Bottomright"))),
                                 tags$head(tags$style(
                                   " .myRow1{
                                     height:1620px;
@@ -135,7 +132,7 @@ ui <- shinyUI(
 
                       )
              ),
-             tabPanel("Plot2",
+             tabPanel("By Station",
                       fluidPage(style="background-color: lightblue",
                                 column(1,
                                        column(12,
@@ -145,17 +142,6 @@ ui <- shinyUI(
                                 ),
                                 column(8,
                                        fluidRow(class = "s2r1",
-                                                column(9,
-                                                       box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
-                                                         plotOutput("all_station_years", width = "100%", height = 700)
-                                                       )
-                                                ),#table_specific_station
-                                                column(3,style = "height:200px;background-color: blue",
-                                                       dataTableOutput("table_specific_station")
-                                                )
-                                       ),
-                                       fluidRow(class = "s2r2",
                                                 column(4,
                                                        box(
                                                          title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
@@ -175,8 +161,19 @@ ui <- shinyUI(
                                                        )
                                                 )
                                        ),
+                                       fluidRow(class = "s2r2",
+                                                column(9,
+                                                       box(
+                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         plotOutput("all_station_years", width = "100%", height = 700)
+                                                       )
+                                                ),#table_specific_station
+                                                column(3,
+                                                       dataTableOutput("table_specific_station")
+                                                )
+                                       ),
                                 ),
-                                column(3,style = "height:200px;background-color: green",
+                                column(3,
 
                                 ),
                                 tags$head(tags$style(
@@ -190,7 +187,7 @@ ui <- shinyUI(
 
                       )
              ),
-             tabPanel("Plot3",
+             tabPanel("Compare",
                       fluidPage(style="background-color: lightblue",
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
@@ -204,24 +201,24 @@ ui <- shinyUI(
                                 ),
                                 column(8,
                                        fluidRow(class = "s3r1",
-                                                column(6,
+                                                column(9,
                                                        box(
                                                          title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("stopsDate1", width = "100%", height = 700)
                                                        )
                                                 ),
-                                                column(6,
+                                                column(3,
                                                        dataTableOutput("table_all_station_d1")
                                                 )
                                        ),
                                        fluidRow(class = "s3r2",
-                                                column(6,
+                                                column(9,
                                                        box(
                                                          title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("stopsDate2", width = "100%", height = 700)
                                                        )
                                                 ),
-                                                column(6,
+                                                column(3,
                                                        dataTableOutput("table_all_station_d2")
                                                 ),
                                        )
@@ -474,7 +471,7 @@ server <- function(input, output, session) {
 
   output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
                                               options = list(
-                                                pageLength = 35
+                                                pageLength = 17
                                               )
   )
   output$table_all_station_d1 <- renderDataTable(simpleData2(allStops1()),
