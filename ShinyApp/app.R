@@ -103,7 +103,9 @@ ui <- shinyUI(
                      plotOutput("stopsByDate", width = "100%", height = 1400)
                    )
             ),
-            column(4,style = "height:200px;background-color: blue"),
+            column(4,style = "height:200px;background-color: blue",
+                  dataTableOutput("table_all_station")
+            ),
             column(4,style = "height:200px;background-color: green"
               # box(
               #  title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
@@ -152,6 +154,17 @@ ui <- shinyUI(
 )
 
 server <- function(input, output, session) {
+  #-----------Utility-------------
+  #This returns the ordering option for radio button
+  #1 = order alphabetically
+  #2 = order by minimum and maximum
+  orderOpt <- function(){
+    return(switch(input$order,
+                  alpha = 1,
+                  minmax = 2,
+                  1))
+  }
+
   #-----------Functions for Aggregate Data-------------
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
   allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
@@ -164,13 +177,18 @@ server <- function(input, output, session) {
     return(merge)
   }
 
-  #-----------Utility-------------
-  #This returns the ordering option for radio button
-  orderOpt <- function(){
-    return(switch(input$order,
-                  alpha = 1,
-                  minmax = 2,
-                  1))
+  #Returns table with only needed columns
+  simpleData <- function(data){
+    orderOption <- orderOpt()
+    frame <- data.frame(data$stationname, data$date, data$rides)
+    if(orderOption == 1){
+      frame <- frame[order(data$stationname),]
+    }
+    else{
+      frame <- frame[order(data$rides),]
+    }
+
+    return(frame)
   }
 
   #-----------Functions for graphs-------------
@@ -213,6 +231,12 @@ server <- function(input, output, session) {
       # max   = paste("2013-04-", x+1, sep="")
     )
   })
+
+  output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
+    options = list(
+      pageLength = 35
+    )
+  )
 
   output$hist2 <- renderPlot({
     justOneStop_2 <- justOneStopReactive_2()
