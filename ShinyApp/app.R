@@ -83,9 +83,15 @@ ui <- shinyUI(
         column(1, style = "height:1620px;background-color: orange",
           column(12,
             dateInput("date1", "Date:", value = "2021-08-23"),
+
             fluidRow(class = "dayRow",
               actionButton("previousday", "Previous Day"),
               actionButton("nextday", "Next Day"),
+            ),
+
+            radioButtons("order", "Order By:",
+              c("Alphabetical" = "alpha",
+                "Minimum to Maximum" = "minmax")
             )
           )
         ),
@@ -146,19 +152,42 @@ ui <- shinyUI(
 )
 
 server <- function(input, output, session) {
+  #Functions to aggregate data
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
   allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))})
 
+  #Functions for graphs
+  #This returns the ordering option for radio button
+  orderOpt <- function(){
+    return(switch(input$order,
+                  alpha = 1,
+                  minmax = 2,
+                  1))
+  }
+
+  #This returns a graph of all stops for a specific date
+  graph_stopsByDate <- function(){
+
+    d_graph <- allStopsByDate()#Gets data
+    d_graph <- d_graph[!duplicated(d_graph$stationname), ] #removes duplicate
+
+    y_rides <- as.numeric(gsub(",", "", d_graph$rides))#fixes rides from string to numeric
+    g <- NULL
+    i_order = orderOpt()
+
+    if(i_order == 2)
+      g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),y_rides) , y=y_rides))
+    else
+      g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=y_rides))
+
+    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+      theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
+
+    return(g)
+  }
 
   #Plot of some date
-  output$stopsByDate <- renderPlot({
-    d_graph <- allStopsByDate()
-    print(input$date1)
-
-    ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=as.numeric(gsub(",", "", d_graph$rides)))) +
-      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
-      theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
-  })
+  output$stopsByDate <- renderPlot({graph_stopsByDate()})
 
   # Next day button
   observeEvent(input$nextday, {
