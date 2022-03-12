@@ -152,11 +152,19 @@ ui <- shinyUI(
 )
 
 server <- function(input, output, session) {
-  #Functions to aggregate data
+  #-----------Functions for Aggregate Data-------------
   justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
-  allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))})
+  allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
 
-  #Functions for graphs
+  #Returns rides for all stations for current date chosen
+  allStopsNoDup <- function(){
+    merge <- allStopsByDate()
+    merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
+    merge$rides <- as.numeric(gsub(",", "", merge$rides))
+    return(merge)
+  }
+
+  #-----------Utility-------------
   #This returns the ordering option for radio button
   orderOpt <- function(){
     return(switch(input$order,
@@ -165,20 +173,18 @@ server <- function(input, output, session) {
                   1))
   }
 
+  #-----------Functions for graphs-------------
   #This returns a graph of all stops for a specific date
   graph_stopsByDate <- function(){
 
-    d_graph <- allStopsByDate()#Gets data
-    d_graph <- d_graph[!duplicated(d_graph$stationname), ] #removes duplicate
-
-    y_rides <- as.numeric(gsub(",", "", d_graph$rides))#fixes rides from string to numeric
+    d_graph <- allStopsNoDup()
     g <- NULL
     i_order = orderOpt()
 
     if(i_order == 2)
-      g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),y_rides) , y=y_rides))
+      g <- ggplot(data=d_graph, aes(x=reorder(factor(d_graph$stationname),d_graph$rides) , y=d_graph$rides))
     else
-      g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=y_rides))
+      g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
     g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
@@ -186,6 +192,7 @@ server <- function(input, output, session) {
     return(g)
   }
 
+  #-----------OnActionEvents----------------
   #Plot of some date
   output$stopsByDate <- renderPlot({graph_stopsByDate()})
 
