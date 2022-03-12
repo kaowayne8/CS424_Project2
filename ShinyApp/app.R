@@ -89,6 +89,8 @@ ui <- shinyUI(
                       fluidPage(style="background-color: lightblue",
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
                                               dateInput("date1", "Date:", value = "2021-08-23"),
 
                                               fluidRow(class = "dayRow",
@@ -105,7 +107,7 @@ ui <- shinyUI(
                                 column(8,
                                         fluidRow(
                                                box(
-                                                 title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                 title = " ", solidHeader = TRUE, status = "primary", width = 12,
                                                  plotOutput("stopsByDate", width = "100%", height = 700)
                                                )
                                         ),
@@ -134,8 +136,10 @@ ui <- shinyUI(
              ),
              tabPanel("By Station",
                       fluidPage(style="background-color: lightblue",
-                                column(1,
+                                column(1, style = "height:1620px;background-color: orange",
                                        column(12,
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
                                           selectInput("select_station", "Select Station", c("UIC-Halsted","O'Hare Airport"), selected = "UIC-Halsted"),
                                           selectInput("select_year", "Select Year", years, selected = 2010)
                                        )
@@ -144,19 +148,19 @@ ui <- shinyUI(
                                        fluidRow(class = "s2r1",
                                                 column(4,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = " ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("station_each_day", width = "100%", height = 700)
                                                        )
                                                 ),
                                                 column(4,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = " ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("station_each_month", width = "100%", height = 700)
                                                        )
                                                 ),
                                                 column(4,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = " ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("station_each_day_of_week", width = "100%", height = 700)
                                                        )
                                                 )
@@ -164,7 +168,7 @@ ui <- shinyUI(
                                        fluidRow(class = "s2r2",
                                                 column(9,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = " ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("all_station_years", width = "100%", height = 700)
                                                        )
                                                 ),#table_specific_station
@@ -191,7 +195,10 @@ ui <- shinyUI(
                       fluidPage(style="background-color: lightblue",
                                 column(1, style = "height:1620px;background-color: orange",
                                        column(12,
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
+                                              br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), 
                                               dateInput("t_date1", "Date 1:", value = "2021-08-23"),
+                                              br(),
                                               dateInput("t_date2", "Date 2:", value = "2021-07-22"),
                                               radioButtons("t_order", "Order By:",
                                                            c("Alphabetical" = "alpha",
@@ -203,7 +210,7 @@ ui <- shinyUI(
                                        fluidRow(class = "s3r1",
                                                 column(9,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = "Graph using Date 1: ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("stopsDate1", width = "100%", height = 700)
                                                        )
                                                 ),
@@ -214,7 +221,7 @@ ui <- shinyUI(
                                        fluidRow(class = "s3r2",
                                                 column(9,
                                                        box(
-                                                         title = "Graph 1: ", solidHeader = TRUE, status = "primary", width = 12,
+                                                         title = "Graph using Date 2: ", solidHeader = TRUE, status = "primary", width = 12,
                                                          plotOutput("stopsDate2", width = "100%", height = 700)
                                                        )
                                                 ),
@@ -243,10 +250,10 @@ ui <- shinyUI(
                       fluidPage(
                         fluidRow(style="font-size: 40px; padding-bottom: 15%",
                                  h1("CTA Rides Data"),
-                                 h4("Author: Wayne Kao"),
+                                 h4("Author: Wayne Kao and Raphael Genova"),
                                  h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
                                  div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from 2001-2021
-          from three stations: UIC-Halsted, O'Hare Airport, and 54th/Cermak. For UIC-Halsted, the coloring of the graph coresponds
+          from all CTA stations. Each page has its own unique functionality to fit the proper visualizations. For UIC-Halsted, the coloring of the graph coresponds
           more to the UIC school year and timings of the year versus O'Hare and 54th/Cermak looks at more towards overall year
           based on the season. The data goes up to November 2021 so December of 2021 is missing in this dataset. You are able
           to switch graphs between looking at all the riders at a particular station with the following criteria:
@@ -360,7 +367,8 @@ server <- function(input, output, session) {
     else
       g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
-    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+    titleBuild <- paste("Total Number of Rides per Station in", input$date1)
+    g <- g + geom_bar(stat="identity") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
 
     return(g)
@@ -377,7 +385,8 @@ server <- function(input, output, session) {
     else
       g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
-    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+    titleBuild <- paste("Total Number of Rides per Station in", input$t_date1)
+    g <- g + geom_bar(stat="identity") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
 
     return(g)
@@ -394,7 +403,8 @@ server <- function(input, output, session) {
     else
       g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
-    g <- g + geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month") +
+    titleBuild <- paste("Total Number of Rides per Station in", input$t_date2)
+    g <- g + geom_bar(stat="identity") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
 
     return(g)
@@ -430,6 +440,7 @@ server <- function(input, output, session) {
     #in aes: , fill=season
     c<-ggplot(data=g_data, aes(factor(month(ymd(date))), rides)) +
       geom_bar(stat="identity") +
+      labs(x = paste("Months in", p_year), y = "Rides", title = paste(p_station,"Rides per Month in",p_year)) +
       scale_x_discrete(limit = factor(monthLimit),labels=monthLabel)
     #+scale_fill_manual(labels=seasons_label, values=seasons_color)
     return(c)
@@ -470,27 +481,23 @@ server <- function(input, output, session) {
   })
 
   output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
+                                              colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
                                                 pageLength = 17
                                               )
   )
   output$table_all_station_d1 <- renderDataTable(simpleData2(allStops1()),
+                                                 colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
                                                 pageLength = 17
                                               )
   )
   output$table_all_station_d2 <- renderDataTable(simpleData2(allStops2()),
+                                                 colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
                                                 pageLength = 17
                                               )
   )
-
-  output$hist2 <- reactive({renderPlot({
-    justOneStop_2 <- justOneStopReactive_2()
-
-    ggplot(data=justOneStop_2, aes(wday(ymd(justOneStop_2$date)),  justOneStop_2$rides, fill=factor(month(ymd(justOneStop_2$date))))) +
-      geom_bar(stat="identity") + labs(x = "Month", y = "Rides", title = "teehee", fill="Month")
-  })})
 
   points <- eventReactive(input$recalc, {
     cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
