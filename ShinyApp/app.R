@@ -5,7 +5,11 @@
 
 #TODO:
 # Make it look better
+  #Background color
+  #Menu column spacing
 # Fix min max on date
+# Fix labels on graph
+# Fix coloring on graph
 
 
 #libraries to include
