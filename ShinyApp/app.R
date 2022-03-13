@@ -536,6 +536,11 @@ server <- function(input, output, session) {
                        popup=paste(sep="<br/>", markerFrame3$stationname, markerFrame3$rides.x, markerFrame3$rides.y))
   })
 
+  observeEvent(input$mymap2_marker_click,{
+    p <- input$mymap2_marker_click
+    updateSelectInput(session, "select_station", selected = p$id)
+  })
+
   output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
                                               colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
@@ -580,7 +585,8 @@ server <- function(input, output, session) {
       addTiles() %>%
       setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
       addCircleMarkers(lng=as.numeric(leafData$long), lat=as.numeric(leafData$lat),
-                       popup=paste(sep="<br/>", leafData$stationname))
+                       popup=paste(sep="<br/>", leafData$stationname),
+                       layerId = leafData$stationname)
   })
 
 
