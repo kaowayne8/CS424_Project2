@@ -26,8 +26,6 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 
-print("===================NEW=====================")
-
 myfiles <- list.files(pattern="*.csv", full.names=TRUE)
 dataStations <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
 colnames(dataStations) <- c("", "station_id", "stationname", "date", "daytype", "rides", "STOP_ID", "Location")
@@ -302,10 +300,7 @@ server <- function(input, output, session) {
 
   #Returns a label on the
   leafRides <- function(station, date){
-    print(date)
-    print(station)
     temp <- subset(dataStations, dataStations$stationname == station & dataStations$date == date)
-    print(temp)
     ridesLabel <- temp$rides
     label <- paste(sep="<br/>", station, ridesLabel)
     return(label)
