@@ -57,6 +57,7 @@ colnames(leafData) <- c("stationname", "lat", "long")
 print(leafData)
 
 years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
+stationNamesDropDown <- unique(dataStations$stationname)
 
 ui <- shinyUI(
   navbarPage("CTA Riders", position = "fixed-bottom",
@@ -116,7 +117,7 @@ ui <- shinyUI(
                                        column(12,
                                               br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
                                               br(),br(),br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(), br(),
-                                          selectInput("select_station", "Select Station", c("UIC-Halsted","O'Hare Airport"), selected = "UIC-Halsted"),
+                                          selectInput("select_station", "Select Station", stationNamesDropDown, selected = "UIC-Halsted"),
                                           selectInput("select_year", "Select Year", years, selected = 2010)
                                        )
                                 ),
@@ -232,8 +233,8 @@ ui <- shinyUI(
                         fluidRow(style="font-size: 40px; padding-bottom: 15%",
                                  h1("CTA Rides Data"),
                                  h4("Author: Wayne Kao and Raphael Genova"),
-                                 h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f"),
-                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from Jan 1, 2001- November 21, 2021
+                                 h4("Dataset: https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f and https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme"),
+                                 div("The data was taken from the city of chicago page. This app was written to compare the amount of riders from Jan 1, 2001- November 21, 2021 along with the locations of all CTA stops by longitude and latitude.
           from all CTA stations. Each page has its own unique functionality to fit the proper visualizations and format. By default, the site goes to the 'By Date' tab. The 'By Date' tab contains a bar graph that has all of the ridership
           of each stop at a particular date and there is also a table that gives more detail about what is displayed on the bar graph. This tab also contains a leaflet which shows geographically where each CTA stop is (which is indicated
           by a blue point). The 'By Station' tab allows the use to compare between two stations at specific years. The bar graphs give ridership numbers per Day, Month, and Weekday. The 'Compare' tab contains two bar graphs and tables each
@@ -272,7 +273,6 @@ server <- function(input, output, session) {
   }
 
   #-----------Functions for Aggregate Data-------------
-  justOneStopReactive_2 <- reactive({subset(dataStations, dataStations$stationname == 'Austin-Forest Park' & year(dataStations$date) == '2001')})
   allStopsByDate <- reactive({subset(dataStations, dataStations$date == ymd(input$date1))}) #Aggregates all stations by specific date
   allStopsDate1 <- reactive({subset(dataStations, dataStations$date == ymd(input$t_date1))}) #Aggregates all stations by specific date
   allStopsDate2 <- reactive({subset(dataStations, dataStations$date == ymd(input$t_date2))}) #Aggregates all stations by specific date
@@ -365,7 +365,7 @@ server <- function(input, output, session) {
       g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
     titleBuild <- paste("Total Number of Rides per Station in", input$t_date1)
-    g <- g + geom_bar(stat="identity") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
+    g <- g + geom_bar(stat="identity", fill="#9933FF") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
 
     return(g)
@@ -383,7 +383,7 @@ server <- function(input, output, session) {
       g <- ggplot(data=d_graph, aes(x=factor(d_graph$stationname), y=d_graph$rides))
 
     titleBuild <- paste("Total Number of Rides per Station in", input$t_date2)
-    g <- g + geom_bar(stat="identity") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
+    g <- g + geom_bar(stat="identity", fill="lightgreen") + labs(x = "Station Names", y = "Total # of Rides", title = titleBuild, fill="Station Names") +
       theme(axis.text.x = element_text(angle = 90, size = 12), axis.text.y = element_text(size = 15))
 
     return(g)
@@ -406,7 +406,7 @@ server <- function(input, output, session) {
     g_data <- specificStation()
     #in aes: , fill=season
     b<-ggplot(data=g_data, aes(g_data$date, g_data$rides) ) +
-      geom_bar(stat="identity") +
+      geom_bar(stat="identity", fill="orange") +
       labs(x = paste("Days in", p_year), y = "Rides", title = paste(p_station,"Rides per Day in",p_year))
     #+scale_fill_manual(labels=seasons_label, values=seasons_color)
     return(b)
@@ -418,7 +418,7 @@ server <- function(input, output, session) {
     g_data <- specificStation()
     #in aes: , fill=season
     c<-ggplot(data=g_data, aes(factor(month(ymd(date))), rides)) +
-      geom_bar(stat="identity") +
+      geom_bar(stat="identity", fill="lightpink") +
       labs(x = paste("Months in", p_year), y = "Rides", title = paste(p_station,"Rides per Month in",p_year)) +
       scale_x_discrete(limit = factor(monthLimit),labels=monthLabel)
     #+scale_fill_manual(labels=seasons_label, values=seasons_color)
@@ -433,7 +433,8 @@ server <- function(input, output, session) {
       geom_bar(stat="identity") +
       labs(x = paste("Weekdays in", p_year), y = "Rides", title = paste(p_station,"Rides per Weekday in", p_year), fill="Weekday") +
       scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
-      scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
+      scale_fill_discrete(name = "Weekday", labels = weekDayLabel) 
+    #scale_fill_manual(labels = c("Weekend", "Work Day", "Work Day", "Work Day", "Work Day", "Work Day", "Weekend"), values=c("darkblue", "#33FFFF", "#33FFFF", "#33FFFF", "#33FFFF", "#33FFFF", "darkblue"))
     return(d)
   }
   #-----------OnActionEvents----------------
@@ -507,6 +508,7 @@ server <- function(input, output, session) {
     graph_eachDayOfWeek()
   })
   output$table_specific_station <- renderDataTable(simpleSpecificStation(specificStation()),
+                                                   colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
                                                 pageLength = 17
                                               )
