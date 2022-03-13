@@ -26,11 +26,23 @@ library(scales)
 library(gridExtra)
 library(dplyr)
 
+print("===================NEW=====================")
+
 myfiles <- list.files(pattern="*.csv", full.names=TRUE)
 dataStations <- do.call(rbind, lapply(myfiles, read.csv, header = FALSE))
 colnames(dataStations) <- c("", "station_id", "stationname", "date", "daytype", "rides", "STOP_ID", "Location")
 dataStations$date <- mdy(dataStations$date)
 dataStations$rides <- as.numeric(gsub(",", "", dataStations$rides))
+markerFrame <- NULL
+markerFrame3 <- NULL
+
+dtdate <- subset(dataStations, dataStations$date == "2021-08-23")
+dtdate <- dtdate[!duplicated(dtdate$stationname), ] #removes duplicate
+
+dtdate3 <- subset(dataStations, dataStations$date == "2021-07-22")
+dtdate3 <- dtdate3[!duplicated(dtdate$stationname), ] #removes duplicate
+merged_2 <- merge(x=dtdate, y=dtdate3, by="stationname")
+
 
 #leaflet data
 coordinates <- dataStations[!duplicated(dataStations$stationname), ]
@@ -54,7 +66,13 @@ coordinates$longitude <- long
 
 leafData <- data.frame(coordinates$stationname, coordinates$latitude, coordinates$longitude)
 colnames(leafData) <- c("stationname", "lat", "long")
-print(leafData)
+#########
+
+markerFrame <- merge(x=dtdate, y=leafData, by="stationname")
+markerFrame3 <- merge(x=merged_2, y=leafData, by="stationname")
+
+#markerFrame2
+colnames(dtdate3) <- c()
 
 years <- c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021)
 
@@ -212,6 +230,8 @@ ui <- shinyUI(
                                        )
                                 ),
                                 column(3,
+                                    leafletOutput("mymap3", height=1520, width="100%")
+
                                     # leafletOutput("mymap"),
                                     # p(),
                                     # actionButton("recalc", "New points")
@@ -253,6 +273,7 @@ server <- function(input, output, session) {
   monthLabel <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
   weekDayLimit <- c(1,2,3,4,5,6,7)
   weekDayLabel <- c("Sun","Mon", "Tue", "Wed", "Thur", "Fri", "Sat")
+
   #-----------Utility-------------
   #This returns the ordering option for radio button
   #1 = order alphabetically
@@ -279,12 +300,43 @@ server <- function(input, output, session) {
   specificStation <- reactive({subset(dataStations, year(ymd(dataStations$date)) == input$select_year & dataStations$stationname == input$select_station)})
   allyearsStation <- reactive({subset(dataStations, dataStations$stationname == input$select_station)})
 
+  #Returns a label on the
+  leafRides <- function(station, date){
+    print(date)
+    print(station)
+    temp <- subset(dataStations, dataStations$stationname == station & dataStations$date == date)
+    print(temp)
+    ridesLabel <- temp$rides
+    label <- paste(sep="<br/>", station, ridesLabel)
+    return(label)
+  }
+
   #Returns rides for all stations for current date chosen
   allStopsNoDup <- function(){
     merge <- allStopsByDate()
     merge <- merge[!duplicated(merge$stationname), ] #removes duplicate
     return(merge)
   }
+
+  leafMakerFrame <- function(){
+    d_temp <- allStopsNoDup()
+    d_temp <- d_temp[!duplicated(d_temp$stationname), ] #removes duplicate
+    m_temp <- merge(x=d_temp, y=leafData, by="stationname")
+    return(m_temp)
+  }
+
+  leafMakerFrame3 <- function(){
+    d_temp <- allStopsDate1()
+    d_temp <- d_temp[!duplicated(d_temp$stationname), ] #removes duplicate
+
+    d_temp2 <- allStopsDate2()
+    d_temp2 <- d_temp2[!duplicated(d_temp2$stationname), ] #removes duplicate
+    merged_temp <- merge(x=d_temp, y=d_temp2, by="stationname")
+
+    m_temp <- merge(x=merged_temp, y=leafData, by="stationname")
+    return(m_temp)
+  }
+
 
   #Returns rides for all stations for current date chosen
   allStops1 <- function(){
@@ -459,6 +511,30 @@ server <- function(input, output, session) {
     )
   })
 
+  observeEvent(input$date1, {
+    markerFrame <- leafMakerFrame()
+    leafletProxy("mymap") %>%
+      clearMarkers() %>%
+      addCircleMarkers(lng=as.numeric(markerFrame$long), lat=as.numeric(markerFrame$lat),
+                       popup=paste(sep="<br/>", markerFrame$stationname, markerFrame$rides))
+  })
+
+  observeEvent(input$t_date2, {
+    markerFrame3 <- leafMakerFrame3()
+    leafletProxy("mymap3") %>%
+      clearMarkers() %>%
+      addCircleMarkers(lng=as.numeric(markerFrame3$long), lat=as.numeric(markerFrame3$lat),
+                       popup=paste(sep="<br/>", markerFrame3$stationname, markerFrame3$rides.x, markerFrame3$rides.y))
+  })
+
+  observeEvent(input$t_date1, {
+    markerFrame3 <- leafMakerFrame3()
+    leafletProxy("mymap3") %>%
+      clearMarkers() %>%
+      addCircleMarkers(lng=as.numeric(markerFrame3$long), lat=as.numeric(markerFrame3$lat),
+                       popup=paste(sep="<br/>", markerFrame3$stationname, markerFrame3$rides.x, markerFrame3$rides.y))
+  })
+
   output$table_all_station <- renderDataTable(simpleData(allStopsNoDup()),
                                               colnames = c('Station Name', 'Date', 'Rides'),
                                               options = list(
@@ -486,7 +562,16 @@ server <- function(input, output, session) {
     leaflet() %>%
       addTiles() %>%
       setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
-      addCircleMarkers(lng=as.numeric(leafData$long), lat=as.numeric(leafData$lat), popup=leafData$stationname)
+      addCircleMarkers(lng=as.numeric(markerFrame$long), lat=as.numeric(markerFrame$lat),
+                       popup=paste(sep="<br/>", markerFrame$stationname, markerFrame$rides))
+  })
+
+  output$mymap3 <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
+      addCircleMarkers(lng=as.numeric(markerFrame3$long), lat=as.numeric(markerFrame3$lat),
+                       popup=paste(sep="<br/>", markerFrame3$stationname, markerFrame3$rides.x, markerFrame3$rides.y))
   })
 
 
