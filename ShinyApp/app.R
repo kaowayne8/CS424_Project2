@@ -175,7 +175,7 @@ ui <- shinyUI(
                                        ),
                                 ),
                                 column(3,
-
+                                       leafletOutput("mymap2", height=1520, width="100%")
                                 ),
                                 tags$head(tags$style(
                                   " .myRow1{
@@ -485,7 +485,7 @@ server <- function(input, output, session) {
       geom_bar(stat="identity") +
       labs(x = paste("Weekdays in", p_year), y = "Rides", title = paste(p_station,"Rides per Weekday in", p_year), fill="Weekday") +
       scale_x_discrete(limit = factor(weekDayLimit), labels=weekDayLabel) +
-      scale_fill_discrete(name = "Weekday", labels = weekDayLabel) 
+      scale_fill_discrete(name = "Weekday", labels = weekDayLabel)
     #scale_fill_manual(labels = c("Weekend", "Work Day", "Work Day", "Work Day", "Work Day", "Work Day", "Weekend"), values=c("darkblue", "#33FFFF", "#33FFFF", "#33FFFF", "#33FFFF", "#33FFFF", "darkblue"))
     return(d)
   }
@@ -573,6 +573,14 @@ server <- function(input, output, session) {
       setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
       addCircleMarkers(lng=as.numeric(markerFrame3$long), lat=as.numeric(markerFrame3$lat),
                        popup=paste(sep="<br/>", markerFrame3$stationname, markerFrame3$rides.x, markerFrame3$rides.y))
+  })
+
+  output$mymap2 <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      setView(lng=-87.6298, lat = 41.8681, zoom = 13) %>%
+      addCircleMarkers(lng=as.numeric(leafData$long), lat=as.numeric(leafData$lat),
+                       popup=paste(sep="<br/>", leafData$stationname))
   })
 
 
